@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import API from "@/utils/api"; // centralized Axios instance
+import API from "@/utils/api.js"; // centralized Axios instance
 
 const initialState = {
   isLoading: false,

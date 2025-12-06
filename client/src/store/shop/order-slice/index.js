@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import API from "@/utils/api"; // centralized axios instance
+import API from "@/utils/api.js"; // centralized axios instance
 
 const initialState = {
   approvalURL: null,
