@@ -26,14 +26,33 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ──────────────────────────────
+// FINAL CORS CONFIG (works for localhost + Vercel)
+// ──────────────────────────────
+const allowedOrigins = [
+  "https://mern-ecommerce-cmgu.vercel.app",   // ← your production frontend
+  "http://localhost:5173",                    // ← Vite dev server
+  "http://127.0.0.1:5173",
+];
+
 app.use(
   cors({
-    origin: 'https://mern-ecommerce-cmgu.vercel.app',
-    methods: ["GET", "POST", "DELETE", "PUT"],
-    credentials: true,
+    origin: (origin, callback) => {
+      // Allow tools with no origin (Postman, mobile apps, etc.)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,        // ← THIS IS REQUIRED for httpOnly cookies
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// Handle preflight requests explicitly (some people need this)
+app.options("*", cors());
 
 app.use(cookieParser());
 app.use(express.json());
