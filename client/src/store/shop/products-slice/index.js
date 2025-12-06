@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   isLoading: false,
@@ -7,33 +7,25 @@ const initialState = {
   productDetails: null,
 };
 
+// Fetch all products with filters and sorting
 export const fetchAllFilteredProducts = createAsyncThunk(
-  "/products/fetchAllProducts",
+  "products/fetchAllProducts",
   async ({ filterParams, sortParams }) => {
-    console.log(fetchAllFilteredProducts, "fetchAllFilteredProducts");
-
     const query = new URLSearchParams({
       ...filterParams,
       sortBy: sortParams,
     });
 
-    const result = await axios.get(
-      `http://localhost:5000/api/shop/products/get?${query}`
-    );
-
-    console.log(result);
-
+    const result = await API.get(`/shop/products/get?${query}`);
     return result?.data;
   }
 );
 
+// Fetch details of a single product
 export const fetchProductDetails = createAsyncThunk(
-  "/products/fetchProductDetails",
+  "products/fetchProductDetails",
   async (id) => {
-    const result = await axios.get(
-      `http://localhost:5000/api/shop/products/get/${id}`
-    );
-
+    const result = await API.get(`/shop/products/get/${id}`);
     return result?.data;
   }
 );
@@ -48,25 +40,27 @@ const shoppingProductSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAllFilteredProducts.pending, (state, action) => {
+      // fetchAllFilteredProducts
+      .addCase(fetchAllFilteredProducts.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchAllFilteredProducts.fulfilled, (state, action) => {
         state.isLoading = false;
         state.productList = action.payload.data;
       })
-      .addCase(fetchAllFilteredProducts.rejected, (state, action) => {
+      .addCase(fetchAllFilteredProducts.rejected, (state) => {
         state.isLoading = false;
         state.productList = [];
       })
-      .addCase(fetchProductDetails.pending, (state, action) => {
+      // fetchProductDetails
+      .addCase(fetchProductDetails.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchProductDetails.fulfilled, (state, action) => {
         state.isLoading = false;
         state.productDetails = action.payload.data;
       })
-      .addCase(fetchProductDetails.rejected, (state, action) => {
+      .addCase(fetchProductDetails.rejected, (state) => {
         state.isLoading = false;
         state.productDetails = null;
       });

@@ -1,61 +1,51 @@
-import axios from "axios";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   cartItems: [],
   isLoading: false,
 };
 
+// Add product to cart
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ userId, productId, quantity }) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/cart/add",
-      {
-        userId,
-        productId,
-        quantity,
-      }
-    );
-
+    const response = await API.post("/shop/cart/add", {
+      userId,
+      productId,
+      quantity,
+    });
     return response.data;
   }
 );
 
+// Fetch cart items
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
   async (userId) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/cart/get/${userId}`
-    );
-
+    const response = await API.get(`/shop/cart/get/${userId}`);
     return response.data;
   }
 );
 
+// Delete a cart item
 export const deleteCartItem = createAsyncThunk(
   "cart/deleteCartItem",
   async ({ userId, productId }) => {
-    const response = await axios.delete(
-      `http://localhost:5000/api/shop/cart/${userId}/${productId}`
-    );
-
+    const response = await API.delete(`/shop/cart/${userId}/${productId}`);
     return response.data;
   }
 );
 
+// Update cart item quantity
 export const updateCartQuantity = createAsyncThunk(
   "cart/updateCartQuantity",
   async ({ userId, productId, quantity }) => {
-    const response = await axios.put(
-      "http://localhost:5000/api/shop/cart/update-cart",
-      {
-        userId,
-        productId,
-        quantity,
-      }
-    );
-
+    const response = await API.put("/shop/cart/update-cart", {
+      userId,
+      productId,
+      quantity,
+    });
     return response.data;
   }
 );
@@ -66,6 +56,7 @@ const shoppingCartSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // addToCart
       .addCase(addToCart.pending, (state) => {
         state.isLoading = true;
       })
@@ -77,6 +68,7 @@ const shoppingCartSlice = createSlice({
         state.isLoading = false;
         state.cartItems = [];
       })
+      // fetchCartItems
       .addCase(fetchCartItems.pending, (state) => {
         state.isLoading = true;
       })
@@ -88,6 +80,7 @@ const shoppingCartSlice = createSlice({
         state.isLoading = false;
         state.cartItems = [];
       })
+      // updateCartQuantity
       .addCase(updateCartQuantity.pending, (state) => {
         state.isLoading = true;
       })
@@ -99,6 +92,7 @@ const shoppingCartSlice = createSlice({
         state.isLoading = false;
         state.cartItems = [];
       })
+      // deleteCartItem
       .addCase(deleteCartItem.pending, (state) => {
         state.isLoading = true;
       })

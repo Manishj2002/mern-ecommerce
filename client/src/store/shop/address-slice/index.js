@@ -1,53 +1,48 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   isLoading: false,
   addressList: [],
 };
 
+// Add a new address
 export const addNewAddress = createAsyncThunk(
-  "/addresses/addNewAddress",
+  "address/addNewAddress",
   async (formData) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/address/add",
-      formData
-    );
-
+    const response = await API.post("/shop/address/add", formData);
     return response.data;
   }
 );
 
+// Fetch all addresses for a user
 export const fetchAllAddresses = createAsyncThunk(
-  "/addresses/fetchAllAddresses",
+  "address/fetchAllAddresses",
   async (userId) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/address/get/${userId}`
-    );
-
+    const response = await API.get(`/shop/address/get/${userId}`);
     return response.data;
   }
 );
 
-export const editaAddress = createAsyncThunk(
-  "/addresses/editaAddress",
+// Edit an address
+export const editAddress = createAsyncThunk(
+  "address/editAddress",
   async ({ userId, addressId, formData }) => {
-    const response = await axios.put(
-      `http://localhost:5000/api/shop/address/update/${userId}/${addressId}`,
+    const response = await API.put(
+      `/shop/address/update/${userId}/${addressId}`,
       formData
     );
-
     return response.data;
   }
 );
 
+// Delete an address
 export const deleteAddress = createAsyncThunk(
-  "/addresses/deleteAddress",
+  "address/deleteAddress",
   async ({ userId, addressId }) => {
-    const response = await axios.delete(
-      `http://localhost:5000/api/shop/address/delete/${userId}/${addressId}`
+    const response = await API.delete(
+      `/shop/address/delete/${userId}/${addressId}`
     );
-
     return response.data;
   }
 );
@@ -58,15 +53,19 @@ const addressSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Add new address
       .addCase(addNewAddress.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(addNewAddress.fulfilled, (state, action) => {
         state.isLoading = false;
+        // Optionally push the new address to addressList
+        if (action.payload.data) state.addressList.push(action.payload.data);
       })
       .addCase(addNewAddress.rejected, (state) => {
         state.isLoading = false;
       })
+      // Fetch all addresses
       .addCase(fetchAllAddresses.pending, (state) => {
         state.isLoading = true;
       })
@@ -77,6 +76,33 @@ const addressSlice = createSlice({
       .addCase(fetchAllAddresses.rejected, (state) => {
         state.isLoading = false;
         state.addressList = [];
+      })
+      // Edit and delete can also have loading states if needed
+      .addCase(editAddress.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(editAddress.fulfilled, (state, action) => {
+        state.isLoading = false;
+        // Update the edited address in the list
+        const index = state.addressList.findIndex(
+          (addr) => addr._id === action.payload.data._id
+        );
+        if (index !== -1) state.addressList[index] = action.payload.data;
+      })
+      .addCase(editAddress.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(deleteAddress.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteAddress.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.addressList = state.addressList.filter(
+          (addr) => addr._id !== action.meta.arg.addressId
+        );
+      })
+      .addCase(deleteAddress.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

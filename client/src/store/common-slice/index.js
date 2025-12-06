@@ -1,30 +1,25 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   isLoading: false,
   featureImageList: [],
 };
 
+// Fetch feature images
 export const getFeatureImages = createAsyncThunk(
-  "/order/getFeatureImages",
+  "common/getFeatureImages",
   async () => {
-    const response = await axios.get(
-      `http://localhost:5000/api/common/feature/get`
-    );
-
+    const response = await API.get("/common/feature/get");
     return response.data;
   }
 );
 
+// Add a new feature image
 export const addFeatureImage = createAsyncThunk(
-  "/order/addFeatureImage",
+  "common/addFeatureImage",
   async (image) => {
-    const response = await axios.post(
-      `http://localhost:5000/api/common/feature/add`,
-      { image }
-    );
-
+    const response = await API.post("/common/feature/add", { image });
     return response.data;
   }
 );
@@ -35,6 +30,7 @@ const commonSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // getFeatureImages
       .addCase(getFeatureImages.pending, (state) => {
         state.isLoading = true;
       })
@@ -45,6 +41,17 @@ const commonSlice = createSlice({
       .addCase(getFeatureImages.rejected, (state) => {
         state.isLoading = false;
         state.featureImageList = [];
+      })
+      // addFeatureImage
+      .addCase(addFeatureImage.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(addFeatureImage.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.featureImageList.push(action.payload.data); // add new image to the list
+      })
+      .addCase(addFeatureImage.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

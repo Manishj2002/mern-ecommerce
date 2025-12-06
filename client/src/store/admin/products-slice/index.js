@@ -1,63 +1,47 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   isLoading: false,
   productList: [],
 };
 
+// Add a new product
 export const addNewProduct = createAsyncThunk(
-  "/products/addnewproduct",
+  "adminProducts/addNewProduct",
   async (formData) => {
-    const result = await axios.post(
-      "http://localhost:5000/api/admin/products/add",
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
+    const result = await API.post("/admin/products/add", formData, {
+      headers: { "Content-Type": "application/json" },
+    });
     return result?.data;
   }
 );
 
+// Fetch all products
 export const fetchAllProducts = createAsyncThunk(
-  "/products/fetchAllProducts",
+  "adminProducts/fetchAllProducts",
   async () => {
-    const result = await axios.get(
-      "http://localhost:5000/api/admin/products/get"
-    );
-
+    const result = await API.get("/admin/products/get");
     return result?.data;
   }
 );
 
+// Edit a product
 export const editProduct = createAsyncThunk(
-  "/products/editProduct",
+  "adminProducts/editProduct",
   async ({ id, formData }) => {
-    const result = await axios.put(
-      `http://localhost:5000/api/admin/products/edit/${id}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
+    const result = await API.put(`/admin/products/edit/${id}`, formData, {
+      headers: { "Content-Type": "application/json" },
+    });
     return result?.data;
   }
 );
 
+// Delete a product
 export const deleteProduct = createAsyncThunk(
-  "/products/deleteProduct",
+  "adminProducts/deleteProduct",
   async (id) => {
-    const result = await axios.delete(
-      `http://localhost:5000/api/admin/products/delete/${id}`
-    );
-
+    const result = await API.delete(`/admin/products/delete/${id}`);
     return result?.data;
   }
 );
@@ -68,6 +52,7 @@ const AdminProductsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch all products
       .addCase(fetchAllProducts.pending, (state) => {
         state.isLoading = true;
       })
@@ -75,7 +60,7 @@ const AdminProductsSlice = createSlice({
         state.isLoading = false;
         state.productList = action.payload.data;
       })
-      .addCase(fetchAllProducts.rejected, (state, action) => {
+      .addCase(fetchAllProducts.rejected, (state) => {
         state.isLoading = false;
         state.productList = [];
       });

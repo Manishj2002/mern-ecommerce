@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import API from "@/utils/api"; // centralized axios instance
 
 const initialState = {
   approvalURL: null,
@@ -9,52 +9,42 @@ const initialState = {
   orderDetails: null,
 };
 
+// Create a new order
 export const createNewOrder = createAsyncThunk(
-  "/order/createNewOrder",
+  "order/createNewOrder",
   async (orderData) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/order/create",
-      orderData
-    );
-
+    const response = await API.post("/shop/order/create", orderData);
     return response.data;
   }
 );
 
+// Capture payment
 export const capturePayment = createAsyncThunk(
-  "/order/capturePayment",
+  "order/capturePayment",
   async ({ paymentId, payerId, orderId }) => {
-    const response = await axios.post(
-      "http://localhost:5000/api/shop/order/capture",
-      {
-        paymentId,
-        payerId,
-        orderId,
-      }
-    );
-
+    const response = await API.post("/shop/order/capture", {
+      paymentId,
+      payerId,
+      orderId,
+    });
     return response.data;
   }
 );
 
+// Get all orders for a user
 export const getAllOrdersByUserId = createAsyncThunk(
-  "/order/getAllOrdersByUserId",
+  "order/getAllOrdersByUserId",
   async (userId) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/order/list/${userId}`
-    );
-
+    const response = await API.get(`/shop/order/list/${userId}`);
     return response.data;
   }
 );
 
+// Get order details
 export const getOrderDetails = createAsyncThunk(
-  "/order/getOrderDetails",
+  "order/getOrderDetails",
   async (id) => {
-    const response = await axios.get(
-      `http://localhost:5000/api/shop/order/details/${id}`
-    );
-
+    const response = await API.get(`/shop/order/details/${id}`);
     return response.data;
   }
 );
@@ -69,6 +59,7 @@ const shoppingOrderSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // createNewOrder
       .addCase(createNewOrder.pending, (state) => {
         state.isLoading = true;
       })
@@ -86,6 +77,7 @@ const shoppingOrderSlice = createSlice({
         state.approvalURL = null;
         state.orderId = null;
       })
+      // getAllOrdersByUserId
       .addCase(getAllOrdersByUserId.pending, (state) => {
         state.isLoading = true;
       })
@@ -97,6 +89,7 @@ const shoppingOrderSlice = createSlice({
         state.isLoading = false;
         state.orderList = [];
       })
+      // getOrderDetails
       .addCase(getOrderDetails.pending, (state) => {
         state.isLoading = true;
       })
@@ -107,6 +100,16 @@ const shoppingOrderSlice = createSlice({
       .addCase(getOrderDetails.rejected, (state) => {
         state.isLoading = false;
         state.orderDetails = null;
+      })
+      // capturePayment (optional loading state)
+      .addCase(capturePayment.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(capturePayment.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(capturePayment.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });
