@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import API from "@/utils/api.js"; // centralized axios instance
+import API from "@/api.js"; // centralized axios instance
 
 const initialState = {
   cartItems: [],
