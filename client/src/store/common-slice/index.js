@@ -14,6 +14,15 @@ export const getFeatureImages = createAsyncThunk(
     return response.data;
   }
 );
+// Delete feature image
+export const deleteFeatureImage = createAsyncThunk(
+  "common/deleteFeatureImage",
+  async (imageId) => {
+    const response = await API.delete(`/common/feature/delete/${imageId}`);
+    return response.data;
+  }
+);
+
 
 // Add a new feature image
 export const addFeatureImage = createAsyncThunk(

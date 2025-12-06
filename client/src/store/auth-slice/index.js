@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import API from "@/api.js"; // centralized axios instance
+import { deleteFeatureImage } from "../common-slice";
 
 const initialState = {
   isAuthenticated: false,
@@ -101,6 +102,11 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+      })
+      .addCase(deleteFeatureImage.fulfilled, (state, action) => {
+        state.featureImageList = state.featureImageList.filter(
+          (img) => img._id !== action.meta.arg
+        );
       });
   },
 });
